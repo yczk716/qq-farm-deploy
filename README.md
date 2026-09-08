@@ -1,5 +1,18 @@
 # QQ Farm Bot 一键部署仓库
 
+> [!IMPORTANT]
+> **🌟 本项目基于 [shichenovo/qq-farm-server](https://github.com/shichenovo/qq-farm-server) 改进而来 —— 感谢原作者 [@shichenovo](https://github.com/shichenovo)！**
+>
+> 在原项目（脱敏的 systemd 部署快照）基础上，本仓库做了以下主要改进：
+>
+> - 🐳 部署形态重写为 **Docker Compose 一键部署**（`deploy.sh`，含 QQ 登录容器编排）
+> - 🔐 新增 **QQ 扫码授权登录**（NapCat 桥接 + 前端真实授权结果轮询 + 登录态持久化）
+> - 🎨 前端 / 推送 / 调度多处定制补丁（金币单位显示、qmsg 推送修复等）
+>
+> 👉 **原项目入口：<https://github.com/shichenovo/qq-farm-server>** —— 觉得本仓库有用的话，请先去给原作者点个 Star ⭐
+>
+> 原项目暂未声明 LICENSE，本仓库仅供个人学习研究；如原作者认为不适宜公开衍生版本，请提 Issue 联系，我会第一时间处理。
+
 本仓库是从一台**正在运行的 QQ 农场 Bot 服务器**导出的完整可部署快照，包含：
 
 - 🤖 农场 Bot 本体（`qq-farm-bot-3010`，已合并上游更新并带定制补丁）
@@ -162,9 +175,9 @@ qq-farm-deploy/
 
 ---
 
-## 来源与免责
+## 来源与致谢
 
-- Bot 本体基于开源项目 [liyangpengs/qq-farm-bot](https://github.com/liyangpengs/qq-farm-bot)（含社区定制），QQ 登录基于 [NapCatQQ](https://github.com/NapNeko/NapCatQQ)，
-  QQ 二进制来自公开镜像 [mlikiowa/napcat-docker](https://github.com/mlikiowa/napcat-docker)，微信换码基于 [yyb-go](https://github.com/cm1916/yyb-go-enhanced)。
-- 本仓库仅含部署编排与少量定制补丁（前端显示优化、推送渠道修复、扫码授权动作移植）。
+- 🌟 **本项目基于 [shichenovo/qq-farm-server](https://github.com/shichenovo/qq-farm-server) 改进而来**：在其脱敏快照（systemd 部署形态）的基础上，重写为 Docker Compose 一键部署、新增 QQ 扫码授权登录链路、并附带少量定制补丁。**二次使用 / 分发时请同样保留对本仓库及原作者的署名。**
+- Bot 本体上游：开源项目 [liyangpengs/qq-farm-bot](https://github.com/liyangpengs/qq-farm-bot)（含社区定制）；QQ 登录基于 [NapCatQQ](https://github.com/NapNeko/NapCatQQ)，
+  QQ 二进制来自公开镜像 [mlikiowa/napcat-docker](https://github.com/mlikiowa/napcat-docker)，微信换码基于 [yyb-go](https://github.com/cm1916/yyb-go-enhanced)。向以上项目的作者与维护者一并致谢 🙏
 - **仅供个人学习研究，请勿用于商业用途；游戏脚本有封号风险，后果自负。**

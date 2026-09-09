@@ -17,8 +17,8 @@
 
 - 🤖 农场 Bot 本体（`qq-farm-bot-3010`，已合并上游更新并带定制补丁）
 - 🌐 前端面板（含**公益小红花 UI** + **金币按单位(万/亿)显示** + **QQ 扫码授权真实结果轮询**定制）
-- 🐧 **QQ + 微信双端挂机**：QQ 走 NapCat 扫码授权，微信走应用宝(YYB)换码
-- 🔧 4 个配套服务：好友 GID 提取(8099) / NapCat 扫码取码(8088) / 下载(8080) / 应用宝微信换码(8450)
+- 🐧 **QQ + 微信双端挂机**：QQ 走 NapCat 扫码授权，或直接用 8089 轻量取码页拿 code；微信走应用宝(YYB)换码
+- 🔧 5 个配套服务：好友 GID 提取(8099) / NapCat 扫码取码(8088) / **农场扫码取码(8089)** / 下载(8080) / 应用宝微信换码(8450)
 - 🐳 全套 Docker Compose 编排（含 QQ 登录容器）+ 📜 `deploy.sh` 一键部署
 - 📘 **给 AI/维护者的升级 SOP**：[docs/UPDATE-GUIDE.md](docs/UPDATE-GUIDE.md)
 
@@ -48,6 +48,7 @@
           │napcat-code-web │   │  (同上 3010)   │
           └────────────────┘   └────────────────┘
 
+  qrlib-code-web   :8089  = QQ 农场扫码取 code（轻量，不依赖 NapCat/QQ 客户端）
   qq-farm-download :8080  = 静态文件下载服务
   yyb-keepalive           = 每 30 分钟微信 login_buffer 保活
 ```
@@ -81,7 +82,8 @@ sudo bash deploy.sh
 | 农场面板 | `http://<IP>:3010` | 默认 `admin/admin`，**登录后立即改密** |
 | QQ 扫码登录 | 面板左侧「QQ扫码登录」（`/qr-login`） | 手机 QQ 扫码 → 确认 → 填账号名 → 授权并启动账号 |
 | 微信登录 | 面板「账号管理 → 添加账号」 | 需要 YYB token（deploy.sh 已随机生成） |
-| 扫码取码页 | `http://<IP>:8088` | 密码见 `docker/.env` |
+| 扫码取码页 | `http://<IP>:8088` | NapCat 方案（需 QQ 客户端容器），密码见 `docker/.env` |
+| **农场取码页** | `http://<IP>:8089` | **QQ 扫码直取农场 code**（轻量，不依赖 QQ 客户端容器），密码同上 |
 | 应用宝管理 | `http://<IP>:8450` | 微信换码通道 |
 
 ---
@@ -138,8 +140,8 @@ QQ for Linux（`docker/qq-linux/`，不入库）。
 | 项 | 默认 | 建议 |
 |---|---|---|
 | 面板账号/密码 | `admin` / `admin` | **立即改成强密码** |
-| 8088 扫码页密码 | deploy.sh 随机生成 | 见 `docker/.env`，勿泄露 |
-| 公网端口 | 3010/8088/8450 必需 | 8080(下载)/8099(GID) 不需要就**不要放行**防火墙 |
+| 8088 / 8089 取码页密码 | deploy.sh 随机生成（两者同值） | 见 `docker/.env`，勿泄露 |
+| 公网端口 | 3010/8088/8089/8450 必需 | 8080(下载)/8099(GID) 不需要就**不要放行**防火墙 |
 | YYB token | 本机自签发 | 仅本机使用，勿泄露 |
 
 > 历史上曾有陌生人通过公网暴露的 8088 扫码页扫了自己的 QQ —— 随机密码 + 防火墙最小放行可杜绝。
@@ -154,6 +156,7 @@ qq-farm-deploy/
 ├── qq-farm-bot-3010/       # Bot 本体（core/dist 运行时真源 + web/dist 前端 + custom-modules 镜像）
 ├── gid-tool-web/           # 好友 GID 提取 (8099)
 ├── napcat-code-web/        # NapCat 扫码取 Code 网页 (8088, 需密码)
+├── qrlib-code-web/         # 农场扫码取 Code 服务 (8089, 基于 lkeme/QRLib，仅 QQ 端)
 ├── yyb-go/                 # 应用宝(微信)换码服务 (8450) + keepalive 脚本
 ├── downloads/              # 下载服务根目录 (8080, 占位)
 ├── systemd/                # systemd unit 文件（传统部署用，token 为占位符）

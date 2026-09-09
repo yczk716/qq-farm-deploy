@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+:root {
+    /* Palette - Keeping the user liked colors but cleaner application */
+    --bg-color: #FCFCFA;
+    --primary: #2F3E33;
+    --secondary: #1A2E22;
+    --accent-lime: #D4E157;
+    --accent-beige: #EBEBE6;
+    --text-primary: #121212;
+    --text-secondary: #5A5A55;
+
+    /* UI */
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    /* More opaque for cleaner look */
+    --glass-border: rgba(47, 62, 51, 0.08);
+    /* Subtle border */
+    --glass-shadow: 0 4px 20px rgba(47, 62, 51, 0.05);
+    --radius-lg: 16px;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    /* Removed heavy noise/grid patterns for simplicity */
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+.font-serif {
+    font-family: 'Playfair Display', serif;
+}
+
+/* Glassmorphism - Simplified */
+.glass-panel {
+    background: white;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: var(--radius-lg);
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: var(--secondary);
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+}
+
+/* Custom Selection */
+::selection {
+    background: var(--accent-lime);
+    color: var(--primary);
+}

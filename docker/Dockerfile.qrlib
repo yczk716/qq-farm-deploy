@@ -1,0 +1,16 @@
+# QQ 农场扫码取 Code 服务 (8089)
+# 上游：https://github.com/lkeme/QRLib (MIT) —— 本仓库仅做集成与访问控制补丁
+FROM node:20-bookworm
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm config set registry https://registry.npmmirror.com \
+    && npm install --omit=dev --no-audit --no-fund
+
+COPY . .
+
+EXPOSE 8089
+ENV PORT=8089
+
+CMD ["node", "src/server.js"]

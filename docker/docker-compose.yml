@@ -81,6 +81,23 @@ services:
       - bridge-socket:/run/qqfarm-napcat-bridge
     networks: [qqfarm-net]
 
+  # ---------- QQ 农场扫码取 Code 服务(8089) ----------
+  # 基于 lkeme/QRLib (MIT)：轻量获取 QQ 端农场 code，不依赖 NapCat/QQ 客户端容器
+  # 网页：http://IP:8089（Basic Auth 密码 = QRLIB_WEB_PASSWORD）
+  qrlib-code-web:
+    build:
+      context: ../qrlib-code-web
+      dockerfile: ../docker/Dockerfile.qrlib
+    image: qrlib-code-web:latest
+    container_name: qrlib-code-web
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    environment:
+      - PORT=8089
+      - QRLIB_WEB_PASSWORD=${QRLIB_WEB_PASSWORD:-}
+    networks: [qqfarm-net]
+
   # ---------- 静态下载服务(8080) ----------
   qq-farm-download:
     build:

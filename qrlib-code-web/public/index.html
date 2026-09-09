@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRLib | 扫码登录</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body class="flex items-center justify-center min-h-screen">
+    <div id="app" class="w-full max-w-5xl p-4 flex gap-3 items-stretch">
+
+        <!-- Left: Login Panel -->
+        <div class="glass-panel p-10 w-full max-w-xl mx-auto fade-in flex flex-col gap-8">
+            <div>
+                <header class="mb-8">
+                    <div class="flex items-center gap-5 mb-3">
+                        <div
+                            class="w-12 h-12 bg-[var(--primary)] rounded-2xl flex items-center justify-center text-white">
+                            <i class="ph ph-qr-code text-3xl"></i>
+                        </div>
+                        <h1 class="font-serif text-4xl font-bold text-[var(--primary)]">QRLib</h1>
+                    </div>
+                    <p class="text-lg text-[var(--text-secondary)]">QQ 扫码登录工具</p>
+                </header>
+
+                <!-- Preset Selection -->
+                <div class="space-y-6 mb-8">
+                    <div>
+                        <label
+                            class="block text-base font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3">选择登录目标</label>
+                        <select v-model="currentPreset" @change="selectPreset(currentPreset)"
+                            class="w-full bg-white border border-[var(--glass-border)] rounded-2xl px-6 py-5 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] appearance-none cursor-pointer">
+                            <option v-for="preset in presets" :key="preset.key" :value="preset.key">
+                                {{ preset.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Custom AppID Input -->
+                    <div v-if="currentPreset === 'miniprogram'" class="animate-fade-in-up">
+                        <label
+                            class="block text-base font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3">小程序
+                            AppID (可选)</label>
+                        <input type="text" v-model="customAppId" placeholder="例如: 1108291530"
+                            class="w-full bg-white border border-[var(--glass-border)] rounded-2xl px-6 py-5 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]">
+                    </div>
+                </div>
+
+                <!-- Action Area -->
+                <div
+                    class="flex flex-col items-center justify-center min-h-[360px] bg-white/50 rounded-3xl border border-[var(--glass-border)] p-10 mb-4 relative">
+                    <!-- Success State -->
+                    <div v-if="loginSuccess" class="text-center animate-fade-in-up">
+                        <div
+                            class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center text-white mx-auto mb-6 shadow-lg shadow-green-200">
+                            <i class="ph ph-check text-5xl"></i>
+                        </div>
+                        <p class="text-2xl font-bold text-[var(--primary)] mb-2">登录成功</p>
+                        <p class="text-base text-[var(--text-secondary)]">凭证已生成，请查看右侧日志</p>
+                    </div>
+
+                    <!-- Loading / Empty State -->
+                    <div v-else-if="!qrImage" class="text-center opacity-60">
+                        <p class="mb-4 text-xl">点击下方按钮生成二维码</p>
+                    </div>
+
+                    <!-- QR Code -->
+                    <div v-else class="text-center space-y-6 animate-fade-in">
+                        <div class="p-4 bg-white rounded-2xl shadow-sm inline-block">
+                            <img :src="qrImage" alt="QR Code" class="w-64 h-64 object-contain">
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-2xl font-bold text-[var(--primary)]">{{ status.msg }}</p>
+                            <p class="text-base text-[var(--text-secondary)]">有效期 2 分钟 | 请使用手机QQ扫码</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="fetchQRCode" :disabled="loading"
+                class="w-full btn-primary flex items-center justify-center gap-4 text-2xl font-bold py-5 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all mt-auto rounded-2xl">
+                <i class="ph" :class="loading ? 'ph-spinner animate-spin' : 'ph-qr-code'"></i>
+                {{ loading ? '生成中...' : (qrImage ? '刷新二维码' : '获取登录二维码') }}
+            </button>
+        </div>
+
+        <!-- Right: Result / Logs (Visible when needed or side-by-side) -->
+        <div class="glass-panel p-8 w-[450px] hidden md:flex flex-col fade-in delay-100">
+            <h3
+                class="font-serif text-2xl font-bold text-[var(--primary)] mb-6 border-b pb-4 border-[var(--glass-border)]">
+                操作日志
+            </h3>
+
+            <div class="flex-1 overflow-y-auto space-y-4 pr-3 custom-scrollbar text-base font-mono leading-relaxed">
+                <div v-for="(log, index) in logs" :key="index" class="animate-fade-in-left"
+                    :class="{'text-red-500': log.type === 'error', 'text-[var(--text-secondary)]': log.type !== 'error'}">
+                    <span class="opacity-50 text-sm mr-3">{{ log.time }}</span>
+                    <span>{{ log.msg }}</span>
+                </div>
+            </div>
+
+            <div v-if="loginSuccess" class="mt-8 pt-6 border-t border-[var(--glass-border)] animate-fade-in-up">
+
+                <!-- Avatar -->
+                <div v-if="avatar" class="flex justify-center mb-6 relative">
+                    <div class="relative">
+                        <img :src="avatar" alt="Avatar"
+                            class="w-24 h-24 rounded-full shadow-xl border-4 border-[var(--glass-border)]">
+                        <div
+                            class="absolute bottom-0 right-0 bg-green-500 w-6 h-6 rounded-full border-4 border-[#2d2f36]">
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="font-bold text-[var(--primary)] mb-4 text-xl flex items-center gap-2">
+                    <i class="ph ph-identification-card"></i> 登录凭证
+                </h4>
+
+                <div class="space-y-3">
+                    <!-- UIN -->
+                    <div v-if="credentials.uin"
+                        class="bg-[var(--secondary)]/30 border border-[var(--glass-border)] rounded-xl p-3 relative group transition-all hover:bg-[var(--secondary)]/50">
+                        <div
+                            class="text-[10px] uppercase text-[var(--text-secondary)] font-bold mb-1 tracking-wider opacity-70">
+                            QQ / UIN</div>
+                        <div class="font-mono text-sm break-all text-[var(--primary)] pr-10 font-bold">{{
+                            credentials.uin }}</div>
+                        <button @click="copyCookie(credentials.uin)"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors text-[var(--text-secondary)]"
+                            title="复制">
+                            <i class="ph ph-copy text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Authorization Code -->
+                    <div v-if="credentials.code"
+                        class="bg-[var(--secondary)]/30 border border-[var(--glass-border)] rounded-xl p-3 relative group transition-all hover:bg-[var(--secondary)]/50">
+                        <div
+                            class="text-[10px] uppercase text-[var(--text-secondary)] font-bold mb-1 tracking-wider opacity-70">
+                            Authorization Code</div>
+                        <div class="font-mono text-xs break-all text-[var(--text-secondary)] pr-10 leading-relaxed">{{
+                            credentials.code }}</div>
+                        <button @click="copyCookie(credentials.code)"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors text-[var(--text-secondary)]"
+                            title="复制">
+                            <i class="ph ph-copy text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Ticket -->
+                    <div v-if="credentials.ticket"
+                        class="bg-[var(--secondary)]/30 border border-[var(--glass-border)] rounded-xl p-3 relative group transition-all hover:bg-[var(--secondary)]/50">
+                        <div
+                            class="text-[10px] uppercase text-[var(--text-secondary)] font-bold mb-1 tracking-wider opacity-70">
+                            Ticket</div>
+                        <div class="font-mono text-xs break-all text-[var(--text-secondary)] pr-10 leading-relaxed">{{
+                            credentials.ticket }}</div>
+                        <button @click="copyCookie(credentials.ticket)"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-colors text-[var(--text-secondary)]"
+                            title="复制">
+                            <i class="ph ph-copy text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>

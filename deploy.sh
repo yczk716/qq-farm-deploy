@@ -42,8 +42,9 @@ else
   CODEPWD="$(openssl rand -hex 6)"
   sed -i "s#REPLACE_WITH_YOUR_YYB_TOKEN#${YYBTOK}#" docker/.env
   sed -i "s#^NAPCAT_CODE_WEB_PASSWORD=.*#NAPCAT_CODE_WEB_PASSWORD=${CODEPWD}#" docker/.env
+  sed -i "s#^QRLIB_WEB_PASSWORD=.*#QRLIB_WEB_PASSWORD=${CODEPWD}#" docker/.env
   # WX_OPENID 留占位：绑定微信账号后，从 yyb-go 管理页取得再填（否则仅影响微信保活）
-  info "  YYB_API_TOKEN / 8088 访问密码 已随机生成，见 docker/.env"
+  info "  YYB_API_TOKEN / 8088+8089 访问密码 已随机生成，见 docker/.env"
 fi
 
 # ---------- 3/5 QQ for Linux ----------
@@ -80,10 +81,11 @@ echo -e " 农场面板    : ${B}http://<服务器IP>:3010${N}  （默认 admin/a
 echo -e " QQ 扫码登录 : 面板左侧 ${B}QQ扫码登录${N}（/qr-login）→ 手机QQ扫码 → 授权并启动账号"
 echo -e " 微信登录    : 面板 ${B}账号管理 → 添加账号${N}（应用宝 token 已自动生成）"
 echo -e " 扫码取码页  : ${B}http://<服务器IP>:8088${N}  密码见 docker/.env 的 NAPCAT_CODE_WEB_PASSWORD"
+echo -e " 农场取码页  : ${B}http://<服务器IP>:8089${N}  QQ 扫码直取农场 code（轻量，无需 QQ 客户端容器）"
 echo -e " 应用宝管理  : ${B}http://<服务器IP>:8450${N}"
 echo -e ""
 echo -e "${Y} 安全提醒:${N}"
-echo -e "  1. 云服务器请在防火墙/安全组放行 3010/8088/8450/8099/8080，其余端口勿放行"
+echo -e "  1. 云服务器请在防火墙/安全组放行 3010/8088/8089/8450/8099/8080，其余端口勿放行"
 echo -e "  2. 8080(下载)/8099(GID) 面向公网开放有风险，不需要就别放行"
 echo -e "  3. 微信账号长期挂机请绑定后把 openid 填入 docker/.env 的 WX_OPENID 并重启 yyb-keepalive"
 echo -e "  4. 升级/维护 SOP 见 docs/UPDATE-GUIDE.md"

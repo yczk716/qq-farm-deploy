@@ -45,6 +45,23 @@ function normalizeAccount(raw) {
     const nick = String(source.nick || '').trim();
     if (nick)
         account.nick = nick;
+    // QQ 扫码/NapCat 链路需要持久化的附加字段：openID 用于「刷新 Code 时校验
+    // 会话仍是同一 QQ」，loginType 决定自动刷新走 NapCat OpenAuth 还是 YYB Go。
+    const openID = String(source.openID || '').trim();
+    if (openID)
+        account.openID = openID;
+    const openid = String(source.openid || '').trim();
+    if (openid)
+        account.openid = openid;
+    const loginType = String(source.loginType || '').trim();
+    if (loginType)
+        account.loginType = loginType;
+    const yybOpenid = String(source.yybOpenid || '').trim();
+    if (yybOpenid)
+        account.yybOpenid = yybOpenid;
+    const wxid = String(source.wxid || '').trim();
+    if (wxid)
+        account.wxid = wxid;
     return account;
 }
 function addOrUpdateAccount(acc) {
@@ -53,7 +70,7 @@ function addOrUpdateAccount(acc) {
     let touchedAccountId = '';
     const source = acc || {};
     const cleanAccount = {};
-    for (const key of ['id', 'name', 'code', 'platform', 'uin', 'qq', 'avatar', 'avatarUrl', 'nick']) {
+    for (const key of ['id', 'name', 'code', 'platform', 'uin', 'qq', 'avatar', 'avatarUrl', 'nick', 'openID', 'openid', 'loginType', 'yybOpenid', 'wxid']) {
         if (source[key] !== undefined)
             cleanAccount[key] = source[key];
     }
@@ -76,6 +93,9 @@ function addOrUpdateAccount(acc) {
             uin: acc.uin ? String(acc.uin) : '',
             qq: acc.qq ? String(acc.qq) : (acc.uin ? String(acc.uin) : ''),
             avatar: acc.avatar || acc.avatarUrl || '',
+            loginType: acc.loginType || '',
+            yybOpenid: acc.yybOpenid || '',
+            wxid: acc.wxid || '',
             createdAt: Date.now(),
             updatedAt: Date.now(),
         });

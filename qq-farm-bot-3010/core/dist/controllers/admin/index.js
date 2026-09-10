@@ -17,8 +17,11 @@ const { mountFarmRoutes } = require('./farm-routes');
 const { mountFriendRoutes } = require('./friend-routes');
 const { mountActivityCenterRoutes } = require('./activity-center-routes');
 const { mountCommerceRoutes } = require('./commerce-routes');
+const { mountLinkOpsRoutes } = require('./link-ops-routes');
 const { mountWxLoginRoutes } = require('./wx-login-routes');
 const { mountQqLoginRoutes } = require('./qq-login-routes');
+const { mountYybWxRoutes } = require('./yyb-wx-routes');
+const { mountNapCatRoutes } = require('./napcat-routes');
 const { setupSocketIO, emitRealtimeStatus: _emitStatus, emitRealtimeLog: _emitLog, emitRealtimeAccountLog: _emitAccountLog, } = require('./socket');
 const adminLogger = createModuleLogger('admin');
 let ctx = null;
@@ -56,15 +59,19 @@ function startAdminServer(dataProvider) {
         app.get('/', (_req, res) => res.send('web build not found. Please build the web project.'));
     }
     app.use('/game-config', express.static(getResourcePath('gameConfig')));
+    app.use('/lk', express.static(path.join(__dirname, '../../../../custom-modules/web')));
     // Mount route modules
     mountAuthRoutes(app, ctx);
     mountWxLoginRoutes(app, ctx);
     mountQqLoginRoutes(app, ctx);
+    mountYybWxRoutes(app, ctx);
+    mountNapCatRoutes(app, ctx);
     mountFarmRoutes(app, ctx);
     mountFriendRoutes(app, ctx);
     mountAccountRoutes(app, ctx);
     mountActivityCenterRoutes(app, ctx);
     mountCommerceRoutes(app, ctx);
+    mountLinkOpsRoutes(app, ctx);
     // SPA fallback
     app.get('*', (req, res) => {
         if (req.path.startsWith('/api') || req.path.startsWith('/game-config')) {

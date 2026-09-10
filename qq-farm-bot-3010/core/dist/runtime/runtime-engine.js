@@ -10,8 +10,6 @@ const { createDataProvider } = require('./data-provider');
 const { createReloginReminderService } = require('./relogin-reminder');
 const { createRuntimeState } = require('./runtime-state');
 const { createWorkerManager } = require('./worker-manager');
-const { createAutoCodeRefreshService } = require('./auto-code-refresh');
-const { createAutoStartOnlineService } = require('./auto-start-online');
 const OPERATION_KEYS = ['harvest', 'farming', 'fertilize', 'plant', 'steal', 'helpFarming', 'taskClaim', 'sell', 'upgrade'];
 function createRuntimeEngine(options = {}) {
     const processRef = options.processRef || process;
@@ -34,16 +32,6 @@ function createRuntimeEngine(options = {}) {
         store,
         sendPushooMessage,
         log,
-    });
-    // Worker 启动/重启的引用占位，供 autoCodeRefresh 的 resolveWorkerControls 使用
-    const engine = { startWorker: null, restartWorker: null };
-    const autoCodeRefresh = createAutoCodeRefreshService({
-        store,
-        getAccounts: store.getAccounts,
-        addOrUpdateAccount: store.addOrUpdateAccount,
-        resolveWorkerControls: () => engine,
-        log,
-        addAccountLog,
     });
     const { getOfflineAutoDeleteMs, triggerOfflineReminder, sendConfiguredPush, } = reloginReminder;
     const { startWorker, stopWorker, restartWorker, callWorkerApi } = createWorkerManager({
@@ -75,17 +63,6 @@ function createRuntimeEngine(options = {}) {
                 onLog(entry, accountId, accountName);
         },
     });
-    engine.startWorker = startWorker;
-    engine.restartWorker = restartWorker;
-    // [新增 2026-09-02] 在线自动挂机：QQ(NapCat)/应用宝在线 + bot 未运行 -> 自动拉起
-    const autoStartOnline = createAutoStartOnlineService({
-        store,
-        getAccounts: store.getAccounts,
-        isAccountRunning: (accountId) => !!workers[accountId],
-        resolveWorkerControls: () => engine,
-        log,
-        addAccountLog,
-    });
     const dataProvider = createDataProvider({
         workers,
         globalLogs: GLOBAL_LOGS,
@@ -104,9 +81,6 @@ function createRuntimeEngine(options = {}) {
         startWorker,
         stopWorker,
         restartWorker,
-        scheduleAutoCodeRefresh: autoCodeRefresh.scheduleAccount,
-        refreshAccountCode: autoCodeRefresh.refreshAccountCode,
-        autoStartOnline,
     });
     runtimeEvents.on('log', (entry) => {
         if (onLog)
@@ -164,9 +138,6 @@ function createRuntimeEngine(options = {}) {
         if (shouldAutoStartAccounts) {
             startAllAccounts();
         }
-        // 按各账号 autoCodeRefresh 配置调度定时刷 Code（默认 60 分钟兜底）
-        autoCodeRefresh.rescheduleAll();
-        autoStartOnline.start();
     }
     function stopAllAccounts() {
         for (const accountId of Object.keys(workers)) {
@@ -187,8 +158,6 @@ function createRuntimeEngine(options = {}) {
         stopWorker,
         restartWorker,
         callWorkerApi,
-        scheduleAutoCodeRefresh: autoCodeRefresh.scheduleAccount,
-        refreshAccountCode: autoCodeRefresh.refreshAccountCode,
         log,
         addAccountLog,
     };

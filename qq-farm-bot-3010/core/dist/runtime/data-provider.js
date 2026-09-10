@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { findAccountByRef, normalizeAccountRef, resolveAccountId: resolveAccountIdByList } = require('../services/account-resolver');
 const { getSchedulerRegistrySnapshot } = require('../services/scheduler');
 function createDataProvider(options) {
-    const { workers, globalLogs, accountLogs, store, getAccounts, callWorkerApi, buildDefaultStatus, normalizeStatusForPanel, filterLogs, addAccountLog, nextConfigRevision, broadcastConfigToWorkers, buildConfigSnapshotForAccount, broadcastGameConfigReload: broadcastGameConfigReloadOpt, startWorker, stopWorker, restartWorker, scheduleAutoCodeRefresh: scheduleAutoCodeRefreshOpt, refreshAccountCode: refreshAccountCodeOpt, } = options;
+    const { workers, globalLogs, accountLogs, store, getAccounts, callWorkerApi, buildDefaultStatus, normalizeStatusForPanel, filterLogs, addAccountLog, nextConfigRevision, broadcastConfigToWorkers, buildConfigSnapshotForAccount, broadcastGameConfigReload: broadcastGameConfigReloadOpt, startWorker, stopWorker, restartWorker, } = options;
     function getStoredAccountsList() {
         const data = getAccounts();
         return Array.isArray(data.accounts) ? data.accounts : [];
@@ -67,19 +67,19 @@ function createDataProvider(options) {
             const after = globalLogs.length;
             return { cleared: before - after, accountId };
         },
-        getLands: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getLands'),
+        getLands: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getLands', true),
         getIllustratedSnapshot: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getIllustratedSnapshot'),
-        getFriends: (accountRef, forceSync = false) => callWorkerApi(resolveAccountRefId(accountRef), 'getFriends', forceSync),
+        getFriends: (accountRef, forceSync = false) => callWorkerApi(resolveAccountRefId(accountRef), 'getFriends', forceSync, true),
         getFriendsCache: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getFriendsCache'),
         clearFriendsCache: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'clearFriendsCache'),
         getInteractRecords: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getInteractRecords'),
-        getFriendLands: (accountRef, gid) => callWorkerApi(resolveAccountRefId(accountRef), 'getFriendLands', gid),
-        getFriendInteractionItems: (accountRef) => (callWorkerApi(resolveAccountRefId(accountRef), 'getFriendInteractionItems')),
-        useFriendInteractionItemBatch: (accountRef, gid, itemId, landIds) => (callWorkerApi(resolveAccountRefId(accountRef), 'useFriendInteractionItemBatch', gid, itemId, landIds)),
-        useFriendFarmInteractionItem: (accountRef, gid, itemId) => (callWorkerApi(resolveAccountRefId(accountRef), 'useFriendFarmInteractionItem', gid, itemId)),
-        getSelfInteractionItems: (accountRef) => (callWorkerApi(resolveAccountRefId(accountRef), 'getSelfInteractionItems')),
-        useSelfInteractionItemBatch: (accountRef, itemId, landIds) => (callWorkerApi(resolveAccountRefId(accountRef), 'useSelfInteractionItemBatch', itemId, landIds)),
-        doFriendOp: (accountRef, gid, opType) => callWorkerApi(resolveAccountRefId(accountRef), 'doFriendOp', gid, opType),
+        getFriendLands: (accountRef, gid) => callWorkerApi(resolveAccountRefId(accountRef), 'getFriendLands', gid, true),
+        getFriendInteractionItems: (accountRef) => (callWorkerApi(resolveAccountRefId(accountRef), 'getFriendInteractionItems', true)),
+        useFriendInteractionItemBatch: (accountRef, gid, itemId, landIds) => (callWorkerApi(resolveAccountRefId(accountRef), 'useFriendInteractionItemBatch', gid, itemId, landIds, true)),
+        useFriendFarmInteractionItem: (accountRef, gid, itemId) => (callWorkerApi(resolveAccountRefId(accountRef), 'useFriendFarmInteractionItem', gid, itemId, true)),
+        getSelfInteractionItems: (accountRef) => (callWorkerApi(resolveAccountRefId(accountRef), 'getSelfInteractionItems', true)),
+        useSelfInteractionItemBatch: (accountRef, itemId, landIds) => (callWorkerApi(resolveAccountRefId(accountRef), 'useSelfInteractionItemBatch', itemId, landIds, true)),
+        doFriendOp: (accountRef, gid, opType) => callWorkerApi(resolveAccountRefId(accountRef), 'doFriendOp', gid, opType, true),
         delFriend: (accountRef, gid) => callWorkerApi(resolveAccountRefId(accountRef), 'delFriend', gid),
         getBag: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getBag'),
         getBagSeeds: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getBagSeeds'),
@@ -94,7 +94,7 @@ function createDataProvider(options) {
         withdrawDog: (accountRef) => (callWorkerApi(resolveAccountRefId(accountRef), 'withdrawDog')),
         useDogFood: (accountRef, itemId, count = 1, uid = 0) => (callWorkerApi(resolveAccountRefId(accountRef), 'useDogFood', itemId, count, uid)),
         getPetProtectLogs: (accountRef) => (callWorkerApi(resolveAccountRefId(accountRef), 'getPetProtectLogs')),
-        getDailyGifts: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getDailyGiftOverview'),
+        getDailyGifts: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getDailyGiftOverview', true),
         getActivityDirectorySnapshot: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getActivityDirectorySnapshot'),
         getActivityCenterSnapshot: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getActivityCenterSnapshot'),
         getCurrentSeasonEvent: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getCurrentSeasonEvent'),
@@ -135,7 +135,7 @@ function createDataProvider(options) {
         purchaseMallProduct: (accountRef, goodsId, count) => (callWorkerApi(resolveAccountRefId(accountRef), 'purchaseMallProduct', goodsId, count)),
         getMysteryShop: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getMysteryShop'),
         purchaseMysteryOffer: (accountRef, npcId) => (callWorkerApi(resolveAccountRefId(accountRef), 'purchaseMysteryOffer', npcId)),
-        getSeeds: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getSeeds'),
+        getSeeds: (accountRef) => callWorkerApi(resolveAccountRefId(accountRef), 'getSeeds', true),
         setAutomation: async (accountRef, key, value) => {
             const accountId = resolveAccountRefId(accountRef);
             if (!accountId) {
@@ -146,11 +146,11 @@ function createDataProvider(options) {
             broadcastConfigToWorkers(accountId);
             return { automation: store.getAutomation(accountId), configRevision: rev };
         },
-        doFarmOp: (accountRef, opType, targetLandId = null) => (callWorkerApi(resolveAccountRefId(accountRef), 'doFarmOp', opType, targetLandId)),
+        doFarmOp: (accountRef, opType, targetLandId = null) => (callWorkerApi(resolveAccountRefId(accountRef), 'doFarmOp', opType, targetLandId, true)),
         fertilizeOwnLand: (accountRef, landId, fertilizerType) => (callWorkerApi(resolveAccountRefId(accountRef), 'fertilizeOwnLand', landId, fertilizerType)),
         doAnalytics: (accountRef, sortBy) => callWorkerApi(resolveAccountRefId(accountRef), 'getAnalytics', sortBy),
-        buyFertilizer: (accountRef, type, count) => callWorkerApi(resolveAccountRefId(accountRef), 'buyFertilizer', type, count),
-        checkAndBuyFertilizer: (accountRef, options) => callWorkerApi(resolveAccountRefId(accountRef), 'checkAndBuyFertilizer', options),
+        buyFertilizer: (accountRef, type, count) => callWorkerApi(resolveAccountRefId(accountRef), 'buyFertilizer', type, count, true),
+        checkAndBuyFertilizer: (accountRef, options) => callWorkerApi(resolveAccountRefId(accountRef), 'checkAndBuyFertilizer', options, true),
         saveSettings: async (accountRef, payload) => {
             const accountId = resolveAccountRefId(accountRef);
             if (!accountId) {
@@ -189,16 +189,11 @@ function createDataProvider(options) {
                 'autoAcceptHarvestStealEnabled',
                 'autoAcceptHarvestStealHarvest',
                 'autoAcceptHarvestStealSteal',
-                'autoCodeRefresh',
             ]) {
                 copyIfPresent(key);
             }
             // One apply performs the only persistence for this save request.
             store.applyConfigSnapshot(snapshot, { accountId });
-            // 账号级定时刷 Code 配置变更后立即按新配置重排
-            if (typeof scheduleAutoCodeRefreshOpt === 'function') {
-                scheduleAutoCodeRefreshOpt(accountId);
-            }
             const rev = nextConfigRevision();
             const config = buildConfigSnapshotForAccount(accountId);
             const { ui: _ui, ...savedConfig } = store.getConfigSnapshot(accountId);
@@ -286,15 +281,12 @@ function createDataProvider(options) {
             });
             return data;
         },
-        startAccount: (accountRef, options = {}) => {
+        startAccount: (accountRef) => {
             const accountId = resolveAccountRefId(accountRef);
             const acc = findAccountByAnyRef(accountId || accountRef);
             if (!acc)
                 return false;
-            startWorker(acc, options);
-            if (accountId && typeof scheduleAutoCodeRefreshOpt === 'function') {
-                scheduleAutoCodeRefreshOpt(accountId);
-            }
+            startWorker(acc);
             return true;
         },
         stopAccount: (accountRef) => {
@@ -306,35 +298,13 @@ function createDataProvider(options) {
                 stopWorker(accountId);
             return true;
         },
-        restartAccount: (accountRef, options = {}) => {
+        restartAccount: (accountRef) => {
             const accountId = resolveAccountRefId(accountRef);
             const acc = findAccountByAnyRef(accountId || accountRef);
             if (!acc)
                 return false;
-            restartWorker(acc, options);
-            if (accountId && typeof scheduleAutoCodeRefreshOpt === 'function') {
-                scheduleAutoCodeRefreshOpt(accountId);
-            }
+            restartWorker(acc);
             return true;
-        },
-        saveAutoCodeRefresh: async (accountRef, config) => {
-            const accountId = resolveAccountRefId(accountRef);
-            if (!accountId)
-                throw new Error('Missing x-account-id');
-            const data = store.setAutoCodeRefresh(accountId, config || {});
-            if (typeof scheduleAutoCodeRefreshOpt === 'function') {
-                scheduleAutoCodeRefreshOpt(accountId);
-            }
-            return { autoCodeRefresh: data };
-        },
-        refreshAccountCode: async (accountRef) => {
-            const accountId = resolveAccountRefId(accountRef);
-            if (!accountId)
-                throw new Error('Missing x-account-id');
-            if (typeof refreshAccountCodeOpt !== 'function')
-                throw new Error('自动刷新服务不可用');
-            const ok = await refreshAccountCodeOpt(accountId, 'manual');
-            return { ok };
         },
         isAccountRunning: (accountRef) => {
             const accountId = resolveAccountRefId(accountRef);

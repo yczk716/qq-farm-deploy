@@ -152,7 +152,7 @@ async function helpWater(friendGid, landIds, stopWhenExpLimit = false) {
     const reply = types.WaterLandReply.decode(replyBody);
     schedulerRef().updateOperationLimits(reply.operation_limits);
     if (stopWhenExpLimit) {
-        await randomDelay(600, 1400);
+        await sleep(200);
         const afterExp = toNum((getUserState() || {}).exp);
         if (afterExp <= beforeExp)
             schedulerRef().autoDisableHelpByExpLimit();
@@ -182,7 +182,7 @@ async function helpFarming(friendGid, landIds, stopWhenExpLimit = false) {
         const dogSkillGiftCount = getFarmingSkillGiftCount(reply);
         schedulerRef().updateOperationLimits(operationLimits);
         if (stopWhenExpLimit && results.length > 0) {
-            await randomDelay(600, 1400);
+            await sleep(200);
             const afterExp = toNum((getUserState() || {}).exp);
             if (afterExp <= beforeExp)
                 schedulerRef().autoDisableHelpByExpLimit();
@@ -296,7 +296,7 @@ async function putPlantItemsDetailed(friendGid, landIds, RequestType, ReplyType,
                 throw e;
         }
         if (index < ids.length - 1 && !schedulerRef().isBadOperationLimitReached()) {
-            await randomDelay(350, 800);
+            await randomDelay(80, 160);
         }
     }
     const limitReached = schedulerRef().isBadOperationLimitReached();

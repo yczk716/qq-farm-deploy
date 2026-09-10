@@ -43,28 +43,15 @@ function startAceRuntime(sender) {
     sendRequest = sender;
     readyLogged = false;
     lastSpeedCheckAt = Date.now();
-    const aceJitter = (base) => Math.max(500, Math.round(base * (1 + (Math.random() * 2 - 1) * 0.05)));
-    const aceLoop = (key, baseMs, fn) => {
-        const tick = async () => {
-            try {
-                await fn();
-            }
-            catch (e) {
-                logWarn('ACE', `${key} 执行异常: ${e.message}`);
-            }
-            aceScheduler.setTimeoutTask(key, aceJitter(baseMs), tick);
-        };
-        aceScheduler.setTimeoutTask(key, aceJitter(baseMs), tick);
-    };
-    aceLoop('anti_data', 5000, sendAntiData);
-    aceLoop('process_received_data', 5000, () => cryptoWasm.processReceivedData());
-    aceLoop('heartbeat_tick', 25000, () => cryptoWasm.heartbeatTick());
-    aceLoop('speed_check', 30000, () => {
+    aceScheduler.setIntervalTask('anti_data', 5000, sendAntiData, { preventOverlap: true });
+    aceScheduler.setIntervalTask('process_received_data', 5000, () => cryptoWasm.processReceivedData());
+    aceScheduler.setIntervalTask('heartbeat_tick', 25000, () => cryptoWasm.heartbeatTick());
+    aceScheduler.setIntervalTask('speed_check', 30000, () => {
         const now = Date.now();
         cryptoWasm.detectSpeedHack(now - lastSpeedCheckAt);
         lastSpeedCheckAt = now;
     });
-    aceLoop('status_report', 150000, () => cryptoWasm.sendStatus());
+    aceScheduler.setIntervalTask('status_report', 150000, () => cryptoWasm.sendStatus());
 }
 function stopAceRuntime(destroyWasm = false) {
     aceScheduler.clearAll();

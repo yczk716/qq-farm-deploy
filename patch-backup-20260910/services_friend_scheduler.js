@@ -412,7 +412,7 @@ async function friendCheckLoop() {
     await runExclusiveAutomationTask('friend_check_loop', checkFriends);
     if (!friendLoopRunning)
         return;
-    friendScheduler.setTimeoutTask('friend_check_loop', randomDelay(Math.max(0, CONFIG.friendCheckInterval) * 0.88, Math.max(0, CONFIG.friendCheckInterval) * 1.12), () => friendCheckLoop());
+    friendScheduler.setTimeoutTask('friend_check_loop', Math.max(0, CONFIG.friendCheckInterval), () => friendCheckLoop());
 }
 function startFriendCheckLoop(options = {}) {
     if (friendLoopRunning)

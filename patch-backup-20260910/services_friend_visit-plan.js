@@ -73,26 +73,8 @@ function buildFriendVisitPlan(input) {
             badOnly.push(target);
         }
     }
-    // 偷得多的先走，其次是帮助需求大的，最后按等级（同级内随机打散 + 轻度相邻交换，避免每次巡查顺序完全一致）
-    primary.sort((a, b) => (Number(b.stealNum) || 0) - (Number(a.stealNum) || 0) || (Number(b.helpNum) || 0) - (Number(a.helpNum) || 0) || (Number(b.level) || 0) - (Number(a.level) || 0));
-    const tierKey = (x) => `${Number(x.stealNum) || 0}|${Number(x.helpNum) || 0}|${Number(x.level) || 0}`;
-    for (let i = 0; i < primary.length;) {
-        let j = i + 1;
-        while (j < primary.length && tierKey(primary[j]) === tierKey(primary[i]))
-            j += 1;
-        for (let k = j - 1; k > i; k--) {
-            const m = i + Math.floor(Math.random() * (k - i + 1));
-            [primary[i], primary[m]] = [primary[m], primary[i]];
-        }
-        i = j;
-    }
-    if (primary.length > 3) {
-        const swaps = 1 + Math.floor(Math.random() * 2);
-        for (let s = 0; s < swaps; s++) {
-            const idx = 1 + Math.floor(Math.random() * (primary.length - 1));
-            [primary[idx - 1], primary[idx]] = [primary[idx], primary[idx - 1]];
-        }
-    }
+    // 偷得多的先走，其次是帮助需求大的，最后按等级
+    primary.sort((a, b) => (b.stealNum - a.stealNum) || (b.helpNum - a.helpNum) || (b.level - a.level));
     // 捣乱优先挑等级高的好友
     badOnly.sort((a, b) => b.level - a.level);
     const badTargets = badOnly.slice(0, maxBadOnlyVisits);

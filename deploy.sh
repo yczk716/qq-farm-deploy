@@ -64,7 +64,8 @@ else
   [ -x docker/qq-linux/qq ] || err "QQ 二进制抽取失败（docker/qq-linux/qq 不存在）"
   info "  已抽取 QQ $(grep -oE '[0-9]+\.[0-9]+\.[0-9]+-[0-9]+' docker/qq-linux/resources/app/package.json 2>/dev/null || echo '')"
 fi
-
+info "构建qq-farm-napcat:farm"
+docker build -f docker/Dockerfile . -t qq-farm-napcat:farm
 # ---------- 4/5 构建并启动 ----------
 info "4/5 构建镜像并启动容器（首次约 3-10 分钟）..."
 cd docker

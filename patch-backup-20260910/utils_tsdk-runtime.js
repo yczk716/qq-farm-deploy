@@ -104,7 +104,7 @@ class TsdkRuntime {
         const model = String(device.deviceId || `${os.type()} ${os.arch()}`);
         const platform = String(CONFIG.os || process.platform);
         const system = String(device.sysSoftware || os.release());
-        return `${model};${platform};${system};android;`;
+        return `${model};${platform};${system};Node.js;`;
     }
     createImports() {
         return {

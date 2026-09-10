@@ -359,18 +359,12 @@ async function runFarmOperation(opType, targetLandIdInput = null, propagateError
     }
     return { hadWork: actions.length > 0, actions };
 }
-function jitterDelay(ms, ratio = 0.12) {
-    const base = Math.max(0, Number(ms) || 0);
-    if (base <= 0)
-        return base;
-    return Math.max(1000, Math.round(base * (1 + (Math.random() * 2 - 1) * ratio)));
-}
 function scheduleNextFarmCheck(delayMs = CONFIG.farmCheckInterval) {
     if (externalSchedulerMode)
         return;
     if (!farmLoopRunning)
         return;
-    farmScheduler.setTimeoutTask('farm_check_loop', jitterDelay(Math.max(0, delayMs)), async () => {
+    farmScheduler.setTimeoutTask('farm_check_loop', Math.max(0, delayMs), async () => {
         if (!farmLoopRunning)
             return;
         await runExclusiveAutomationTask('farm_check_loop', checkFarm);
